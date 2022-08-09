@@ -188,3 +188,123 @@ DotPlot(object =obj, features =sym$SYMBOL,
         axis.text =element_text(size = 20, color = 'black'))+
   theme(axis.text.x = element_text(size = 20,angle = 90, vjust = 0.5,hjust = 1))+theme(
     plot.title = element_text(family = "Times",color="black", size=14, face="italic"))
+
+############################################ testis ###################################################
+# 1.Setup the Seurat Object（创建Seurat对象）
+library(dplyr)
+library(Seurat)
+rm(list = ls())
+tes.data <- Read10X(data.dir = "~/scRNA_pld6/t1/")
+testis <- CreateSeuratObject(counts = tes.data, project = "testis", min.cells = 3, 
+                             min.features =200) # gene:13714,cells：2700
+
+testis[["percent.mito"]] <- PercentageFeatureSet(object = testis, pattern = "^mt-") #线粒体基因以MT开头的选择出来
+testis.mt=testis[["percent.mito"]]
+head(x = testis@meta.data, 5)
+VlnPlot(object = testis, features = c("nFeature_RNA", "nCount_RNA", "percent.mito"), ncol = 3) 
+testis <- subset(x = testis, subset = nFeature_RNA >200& nFeature_RNA < 2000& percent.mito < 10)
+testis <- NormalizeData(object = testis, normalization.method = "LogNormalize", scale.factor = 1e4)
+testis <- FindVariableFeatures(object = testis,selection.method = 'vst', nfeatures = 2000)
+all.genes <- rownames(x = testis)
+testis <- ScaleData(object = testis, vars.to.regress =  c("nCount_RNA", "percent.mito"))
+testis <- RunPCA(object = testis, features = VariableFeatures(object = testis))
+testis <- JackStraw(object = testis, num.replicate = 100)
+testis <- ScoreJackStraw(object = testis, dims = 1:20)
+ElbowPlot(object = testis) #基于每一个解释的方差百分比（“ElbowPlot”函数）对主成分进行排序
+
+testis <- FindNeighbors(object = testis, dims = 1:18)
+testis <- FindClusters(object = testis, resolution =0.6)
+testis <- RunUMAP(object = testis, dims = 1:18)
+DimPlot(object = testis, reduction = 'umap',label = TRUE,pt.size = 1)+
+  theme(axis.title =element_text(size = 20),
+        axis.text =element_text(size = 20, color = 'black'),legend.text = element_text(size=14))
+
+
+# TSNE
+testis <- RunTSNE(object = testis, dims = 1:18)
+DimPlot(object = testis, reduction = 'tsne',label = TRUE )
+DotPlot(object = testis, features = c("star","gsdf","dazl","pcna","nanos3","pld6",
+                                      "sycp2","sycp3","tekt1"))+
+  theme(axis.title =element_text(size = 20),
+        axis.text =element_text(size = 20, color = 'black'))+
+  theme(axis.text.x = element_text(angle =90,hjust = 0.5,vjust = 0.5),legend.text = element_text(size=16))
+
+new.cluster.ids <- c("spermatocyte-late","spermatocyte","spermatocyte-early",
+                     "spermatids","spermatogonia-late","spermatogonia-late", "spermatids",
+                     "spermatogonia","sertoli","leydig")
+names(x=new.cluster.ids)=levels(x = testis)
+testis <- RenameIdents(object = testis, new.cluster.ids)
+FeaturePlot(object = testis, features = c("pld6"))+
+  theme(axis.title =element_text(size = 20),
+        axis.text =element_text(size = 20, color = 'black'))+
+  theme(axis.text.x = element_text(angle =0),legend.text = element_text(size=16))
+
+FeaturePlot(object = testis, features = c("sycp3"))+
+  theme(axis.title =element_text(size = 20),
+        axis.text =element_text(size = 20, color = 'black'))+
+  theme(axis.text.x = element_text(angle =0, hjust = 0.5),legend.text = element_text(size=16))
+
+saveRDS(testis, file = "~/scRNA_pld6/testis1.rds")
+testis1 <- readRDS("~/scRNA_pld6/testis1.rds")
+FeaturePlot(object =testis1, c('pld6'), cols = c("grey90", "red"), pt.size = 0.5)+
+  theme(axis.title =element_text(size = 20),
+        axis.text =element_text(size = 20, color = 'black'))+
+  theme(axis.text.x = element_text(size = 20))+theme(
+    plot.title = element_text(family = "Arial",color="black", size=24, face="italic"))+theme(
+      plot.title = element_text(family = "Arial",color="black", size=24, face="italic"))
+# 1.Setup the Seurat Object（创建Seurat对象）
+library(dplyr)
+library(Seurat)
+rm(list = ls())
+gc()
+tes.data <- Read10X(data.dir = "~/scRNA_pld6/t2/")
+testis <- CreateSeuratObject(counts = tes.data, project = "testis", min.cells = 3, 
+                             min.features =200) # gene:13714,cells：2700
+
+testis[["percent.mito"]] <- PercentageFeatureSet(object = testis, pattern = "^mt-") #线粒体基因以MT开头的选择出来
+testis.mt=testis[["percent.mito"]]
+head(x = testis@meta.data, 5)
+VlnPlot(object = testis, features = c("nFeature_RNA", "nCount_RNA", "percent.mito"), ncol = 3) 
+testis <- subset(x = testis, subset = nFeature_RNA >200& nFeature_RNA < 2000& percent.mito < 10)
+testis <- NormalizeData(object = testis, normalization.method = "LogNormalize", scale.factor = 1e4)
+testis <- FindVariableFeatures(object = testis,selection.method = 'vst', nfeatures = 2000)
+all.genes <- rownames(x = testis)
+testis <- ScaleData(object = testis, vars.to.regress =  c("nCount_RNA", "percent.mito"))
+testis <- RunPCA(object = testis, features = VariableFeatures(object = testis))
+testis <- JackStraw(object = testis, num.replicate = 100)
+testis <- ScoreJackStraw(object = testis, dims = 1:20)
+ElbowPlot(object = testis) #基于每一个解释的方差百分比（“ElbowPlot”函数）对主成分进行排序
+testis <- FindNeighbors(object = testis, dims = 1:18)
+testis <- FindClusters(object = testis, resolution =0.6)
+testis <- RunUMAP(object = testis, dims = 1:18)
+DimPlot(object = testis1, reduction = 'umap',label = TRUE,pt.size = 1)+
+  theme(axis.title =element_text(size = 20),
+        axis.text =element_text(size = 20, color = 'black'),legend.text = element_text(size=14))+guides(color=FALSE)
+# TSNE
+testis <- RunTSNE(object = testis, dims = 1:18)
+DimPlot(object = testis, reduction = 'tsne',label = TRUE )
+DotPlot(object = testis, features = c("gsdf","star","dazl","pcna","ddx4","piwil1","pld6",
+                                      "sycp2","sycp3","tekt1","mfn1b","mfn2","opa1",
+                                      "dnm1l",
+                                      "tfam","ppargc1b","pink1","map1lc3b","sqstm1"))+
+  theme(axis.title =element_text(size = 20),
+        axis.text =element_text(size = 20, color = 'black'))+
+  theme(axis.text.x = element_text(angle =90,hjust = 1,vjust=0.5),legend.text = element_text(size=16))+
+  scale_y_discrete(limits=c("sertoli","leydig","spermatogonia","spermatogonia-late","spermatocyte-early",
+                            "spermatocyte","spermatocyte-late","spermatids"))
+new.cluster.ids <- c("spermatocyte-late","spermatocyte","spermatocyte-early",
+                     "spermatids","spermatogonia-late","spermatogonia-late", "spermatids",
+                     "spermatogonia","sertoli","leydig")
+names(x=new.cluster.ids)=levels(x = testis)
+testis <- RenameIdents(object = testis, new.cluster.ids)
+FeaturePlot(object = testis, features = c("pld6"))+
+  theme(axis.title =element_text(size = 20),
+        axis.text =element_text(size = 20, color = 'black'))+
+  theme(axis.text.x = element_text(angle =0),legend.text = element_text(size=16))
+FeaturePlot(object = testis, features = c("sycp3"))+
+  theme(axis.title =element_text(size = 20),
+        axis.text =element_text(size = 20, color = 'black'))+
+  theme(axis.text.x = element_text(angle =0, hjust = 0.5),legend.text = element_text(size=16))
+saveRDS(testis, file = "~/scRNA_pld6/testis.rds")
+
+
